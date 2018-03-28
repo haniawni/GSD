@@ -1,0 +1,10 @@
+{
+	"dev": {
+		"driver": "postgres",
+		"user":   {"ENV": "GSD_USERNAME"},
+		"password": {"ENV": "GSD_PASSWORD"},
+		"host": "localhost",
+		"database": "gsd"
+		},
+	"sql-file": true
+}
