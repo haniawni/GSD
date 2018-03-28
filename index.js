@@ -25,7 +25,7 @@ function intentCallback(topic, msg) {
 		'text': "Acknowledged. I heard: " + body.input + " as " + body.intent.intentName
 	};
 
-	client.publish('hermes/dialogueManager/continueSession',JSON.stringify(resp))
+	client.publish('hermes/dialogueManager/endSession',JSON.stringify(resp))
 }
 
 
