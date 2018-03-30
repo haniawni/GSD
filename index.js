@@ -126,7 +126,7 @@ console.log("test")
 client.on('connect',function () {
 	console.log("CONNECTED & SUBSCRIBED SUCCESSFULLY")
 	client.publish("hermes/dialogueManager/startSession", JSON.stringify({"init":{"type":"notification","text":"JARVIS ONLINE."}}))
-	client.subscribe('hermes/intent/');
+	client.subscribe('hermes/intent/#');
 });
 
 client.on('error',function(err){
