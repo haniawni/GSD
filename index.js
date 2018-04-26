@@ -124,9 +124,6 @@ function intentCallback(topic, msg) {
 
 
 
-console.log("test")
-
-
 
 client.on('connect',function () {
 	console.log("CONNECTED & SUBSCRIBED SUCCESSFULLY")
