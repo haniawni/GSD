@@ -3,17 +3,17 @@ var dotenv = require("dotenv");
 var mqtt = require('mqtt');
 var mqtt_options = {
 	servers: [{
-		host: 'piggy.local',
+		host: 'localhost',
 		port: 1883
 	}],
 	will: {
-		topic: "/GSD/RIP",
-		payload: "GSD backend lost connection",
+		topic: "/snips/XFP/RIP",
+		payload: "XFP backend lost connection",
 		qos: 0,
 		retain: 0
 	}
 };
-var client = mqtt.connect('mqtt://piggy.local');
+var client = mqtt.connect(mqtt_options);
 
 
 var userStates = {
@@ -27,6 +27,10 @@ var userStates = {
 var userState = userStates.done;
 
 function endDialogue(sessionId,text){
+	var resp = {
+		'sessionId': sessionId,
+		'text': text
+	};
 	client.publish('hermes/dialogueManager/endSession',JSON.stringify(resp));
 }
 function continueDialogue(sessionId,text,intentFilter){
@@ -45,6 +49,7 @@ function intentCallback(topic, msg) {
 
 	var body = JSON.parse(msg);
 	var intentName = body.intent.intentName;
+	intentName = intentName.slice(intentName.lastIndexOf(':')+1);
 	var intent = body.intent;
 	var sessionId = body.sessionId;
 
@@ -52,7 +57,7 @@ function intentCallback(topic, msg) {
 		case userStates.done: 	
 		//Day is done or has not started yet
 			switch(intentName) {
-				case "startTriaging":
+				case "haniawni:startTriaging":
 				//Time to Triage!
 					//TODO(someday): check abt deleting CTL beforehand
 					//TODO: save old CTL
@@ -61,14 +66,14 @@ function intentCallback(topic, msg) {
 
 					continueDialogue(sessionId,
 						"What do you need to do today?",
-						['triageAppend', 'triageStatus', 'triageDone'] //TODO: add 'do this later'??
+						['haniawni:triageAppend', 'haniawni:triageStatus', 'haniawni:triageDone'] //TODO: add 'do this later'??
 						);
 					break;
 				default:
 				// inappropriate relaxing-state input
 					continueDialogue(sessionId,
 						"Inappropriate Intent: " + intent + ". Currently " + "relaxing" + ".",
-						['startTriaging']);
+						['haniawni:startTriaging']);
 			}
 		break;
 
@@ -76,20 +81,20 @@ function intentCallback(topic, msg) {
 		case userStates.Triaging:
 		// Currently triaging tasks from MTL to CTL
 			switch(intentName){
-				case 'triageStatus':
+				case 'haniawni:triageStatus':
 				// Requesting current CTL
 					// TODO: fetch entire CTL from DB
 					// TODO: squish down tasks & concatenate
 					continueDialogue(sessionId,
 						"Please pretend I read off your CTL here.", // TODO: actual value
-						['triageAppend', 'triageStatus', 'triageDone']);
+						['haniawni:triageAppend', 'haniawni:triageStatus', 'haniawni:triageDone']);
 					break;
-				case 'triageAppend':
+				case 'haniawni:triageAppend':
 				//slot contains new task
 					//TODO: insert task into CTL in DB
 					continueDialogue(sessionId,
 						"Good, then what?",
-						['triageAppend', 'triageStatus', 'triageDone']);
+						['haniawni:triageAppend', 'haniawni:triageStatus', 'haniawni:triageDone']);
 					break;
 				case 'triageDone':
 				//triaging complete; proceed to Execution
@@ -103,7 +108,7 @@ function intentCallback(topic, msg) {
 				// inappropriate triaging-state input
 					continueDialogue(sessionId,
 						"What? I heard "+intentName+", but we're currently triaging.",
-						['triageAppend', 'triageStatus', 'triageDone']);
+						['haniawni:triageAppend', 'haniawni:triageStatus', 'haniawni:triageDone']);
 			}
 		break;
 
@@ -126,7 +131,12 @@ console.log("test")
 client.on('connect',function () {
 	console.log("CONNECTED & SUBSCRIBED SUCCESSFULLY")
 	client.publish("hermes/dialogueManager/startSession", JSON.stringify({"init":{"type":"notification","text":"JARVIS ONLINE."}}))
-	client.subscribe('hermes/intent/#');
+	client.subscribe([
+		'hermes/intent/haniawni:startTriaging',
+		'hermes/intent/haniawni:triageAppend',
+		'hermes/intent/haniawni:triageDone',
+		'hermes/intent/haniawni:triageStatus'
+		]);
 });
 
 client.on('error',function(err){
