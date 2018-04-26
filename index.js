@@ -15,17 +15,6 @@ var mqtt_options = {
 };
 var client = mqtt.connect(mqtt_options);
 
-
-var userStates = {
-	paused: 	-1,
-	done: 		0,
-	Executing: 	1,
-	Triaging: 	2,
-	Inboxing: 	3,
-	Clarifying: 4
-}
-var userState = userStates.done;
-
 function endDialogue(sessionId,text){
 	var resp = {
 		'sessionId': sessionId,
@@ -44,6 +33,16 @@ function continueDialogue(sessionId,text,intentFilter){
 
 
 
+var userStates = {
+	paused: 	-1,
+	done: 		0,
+	Executing: 	1,
+	Triaging: 	2,
+	Inboxing: 	3,
+	Clarifying: 4
+}
+var userState = userStates.done;
+
 function intentCallback(topic, msg) {
 	console.log("MESSAGE: "+msg)
 
@@ -52,6 +51,8 @@ function intentCallback(topic, msg) {
 	intentName = intentName.slice(intentName.lastIndexOf(':')+1);
 	var intent = body.intent;
 	var sessionId = body.sessionId;
+
+	console.log("State: "+userState+" Intent: "+intentName);
 
 	switch (userState){
 		case userStates.done: 	
@@ -72,7 +73,7 @@ function intentCallback(topic, msg) {
 				default:
 				// inappropriate relaxing-state input
 					continueDialogue(sessionId,
-						"Inappropriate Intent: " + intent + ". Currently " + "relaxing" + ".",
+						"Inappropriate Intent: " + intentName + ". Currently " + "relaxing" + ".",
 						['haniawni:startTriaging']);
 			}
 		break;
