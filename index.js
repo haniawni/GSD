@@ -44,7 +44,7 @@ var userStates = {
 var userState = userStates.done;
 
 function intentCallback(topic, msg) {
-	console.log("MESSAGE: "+msg)
+	// console.log("MESSAGE: "+msg)
 
 	var body = JSON.parse(msg);
 	var intentName = body.intent.intentName;
