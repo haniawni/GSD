@@ -58,7 +58,7 @@ function intentCallback(topic, msg) {
 		case userStates.done: 	
 		//Day is done or has not started yet
 			switch(intentName) {
-				case "haniawni:startTriaging":
+				case "startTriaging":
 				//Time to Triage!
 					//TODO(someday): check abt deleting CTL beforehand
 					//TODO: save old CTL
@@ -67,14 +67,14 @@ function intentCallback(topic, msg) {
 
 					continueDialogue(sessionId,
 						"What do you need to do today?",
-						['haniawni:triageAppend', 'haniawni:triageStatus', 'haniawni:triageDone'] //TODO: add 'do this later'??
+						['triageAppend', 'triageStatus', 'triageDone'] //TODO: add 'do this later'??
 						);
 					break;
 				default:
 				// inappropriate relaxing-state input
 					continueDialogue(sessionId,
 						"Inappropriate Intent: " + intentName + ". Currently " + "relaxing" + ".",
-						['haniawni:startTriaging']);
+						['startTriaging']);
 			}
 		break;
 
@@ -82,20 +82,20 @@ function intentCallback(topic, msg) {
 		case userStates.Triaging:
 		// Currently triaging tasks from MTL to CTL
 			switch(intentName){
-				case 'haniawni:triageStatus':
+				case 'triageStatus':
 				// Requesting current CTL
 					// TODO: fetch entire CTL from DB
 					// TODO: squish down tasks & concatenate
 					continueDialogue(sessionId,
 						"Please pretend I read off your CTL here.", // TODO: actual value
-						['haniawni:triageAppend', 'haniawni:triageStatus', 'haniawni:triageDone']);
+						['triageAppend', 'triageStatus', 'triageDone']);
 					break;
-				case 'haniawni:triageAppend':
+				case 'triageAppend':
 				//slot contains new task
 					//TODO: insert task into CTL in DB
 					continueDialogue(sessionId,
 						"Good, then what?",
-						['haniawni:triageAppend', 'haniawni:triageStatus', 'haniawni:triageDone']);
+						['triageAppend', 'triageStatus', 'triageDone']);
 					break;
 				case 'triageDone':
 				//triaging complete; proceed to Execution
@@ -109,7 +109,7 @@ function intentCallback(topic, msg) {
 				// inappropriate triaging-state input
 					continueDialogue(sessionId,
 						"What? I heard "+intentName+", but we're currently triaging.",
-						['haniawni:triageAppend', 'haniawni:triageStatus', 'haniawni:triageDone']);
+						['triageAppend', 'triageStatus', 'triageDone']);
 			}
 		break;
 
